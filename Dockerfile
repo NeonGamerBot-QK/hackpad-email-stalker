@@ -22,7 +22,7 @@ RUN bundle install
 COPY . .
 
 # Expose the port (Sinatra/Puma/Rack default)
-EXPOSE 3000
+EXPOSE 4567
 
 # Default command
 CMD ["ruby", "src/main.rb"]
