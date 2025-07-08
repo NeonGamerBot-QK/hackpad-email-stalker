@@ -4,6 +4,8 @@ require 'uri'
 require 'net/http'
 require 'securerandom'
 enable :sessions
+set :port, ENV.fetch("PORT", 4567)  # Fallback to 4567 if PORT isn't set
+set :bind, '0.0.0.0'                # Ensure it listens on all interfaces
 
 SLACK_TOKEN = ENV["SLACK_TOKEN"]
 AIRTABLE_TOKEN= ENV["AIRTABLE_TOKEN"]
