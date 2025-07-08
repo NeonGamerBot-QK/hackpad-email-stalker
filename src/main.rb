@@ -19,13 +19,16 @@ helpers do
 end
 
 def get_aquery_msg(index)
-  switch index:
+  case index
   when 1
-    "Success! sent to your slack dms :3"
+    "Success! sent to your slack DMs :3"
   when 2
     "Invalid CSRF token. Please refresh the page"
+  else
+    "Unknown status"
   end
 end
+
 def post_message_to_slack(slack_id, message)
   uri = URI("https://slack.com/api/chat.postMessage")
   req = Net::HTTP::Post.new(uri)
@@ -127,8 +130,8 @@ get '/' do
     </div>
     <div class="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
       <div class="card-body">
-       #{" <div role='alert' class='alert #{aquery == 1 ? "alert-info" : "alert-error"} alert-soft'>
-  <span>Error! Task failed successfully.</span>
+       #{" <div role='alert' class='alert #{aquery == "1" ? "alert-info" : "alert-error"} alert-soft'>
+  <span>#{get_aquery_msg(aquery)}</span>
 </div>" if aquery}
      <form action="/submit" method="post">
   <input type="hidden" name="authenticity_token" value="#{csrf_token}">
@@ -163,5 +166,42 @@ end
 
 get '/direct/:id' do
   id = params[:id]
-  puts "Direct access to ID: #{id}"
+# get airtable record by id
+  uri = URI("https://api.airtable.com/v0/#{AIRTABLE_BASE_ID}/#{AIRTABLE_TABLE_NAME}/#{id}")
+  req = Net::HTTP::Get.new(uri)
+  # pass headers
+  req['Content-Type'] = 'application/json'
+  req['Authorization'] = "Bearer #{AIRTABLE_TOKEN}"  # Make sure this is set!
+  res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+    http.request(req)
+  end
+  data = JSON.parse(res.body)
+  puts "Airtable API Response: #{data.inspect}"
+  show_tracking = data['fields'] && data['fields']['tracking_number'] ? data['fields']['tracking_number'] : false
+   <<~HTML
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get hackpad tracking</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<meta name="description" content="Get your hackpad tracking status with a simple form.">
+    <meta name="keywords" content="hackpad, tracking, status, form, submit">
+</head>
+<body>
+<div class="hero bg-base-200 min-h-screen">
+  <div class="hero-content flex-col">
+    <div class="text-center ">
+      <h1 class="text-5xl font-bold">#{show_tracking ? "Tracking number" : "Nothing for you 3:" }</h1>
+      <p class="py-6">
+      #{show_tracking ? "Here is your tracking number: #{data['fields']['tracking_number']}" : "You have no tracking number or this record doesnt exist."}
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+  HTML
 end
