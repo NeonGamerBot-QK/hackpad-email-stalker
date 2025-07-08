@@ -9,3 +9,5 @@ gem "sinatra", "~> 4.1"
 gem "dotenv", "~> 3.1"
 
 gem "securerandom", "~> 0.4.1"
+
+gem "rackup", "~> 2.2"
