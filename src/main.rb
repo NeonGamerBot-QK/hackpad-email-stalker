@@ -20,9 +20,9 @@ end
 
 def get_aquery_msg(index)
   case index
-  when 1
+  when "1"
     "Success! sent to your slack DMs :3"
-  when 2
+  when "2"
     "Invalid CSRF token. Please refresh the page"
   else
     "Unknown status"
