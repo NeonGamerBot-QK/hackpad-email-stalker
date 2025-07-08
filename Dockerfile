@@ -25,4 +25,4 @@ COPY . .
 EXPOSE 3000
 
 # Default command
-CMD ["ruby", "src/main.ru"]
+CMD ["ruby", "src/main.rb"]
