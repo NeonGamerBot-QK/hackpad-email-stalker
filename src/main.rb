@@ -4,8 +4,11 @@ require 'uri'
 require 'net/http'
 require 'securerandom'
 #set :protection, except: :host
-disable :protection 
+#disable :protection 
 #set :protection, origin_whitelist: ['*.a.hackclub.com']
+set :protection, except: :http_origin  # this disables host checking
+disable :protection  # <-- this fully disables Rack::Protection (safe for internal apps)
+
 enable :sessions
 set :port, ENV.fetch("PORT", 4567)  # Fallback to 4567 if PORT isn't set
 set :bind, '0.0.0.0'                # Ensure it listens on all interfaces
