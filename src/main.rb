@@ -3,8 +3,8 @@ require 'sinatra'
 require 'uri'
 require 'net/http'
 require 'securerandom'
-set :protection, except: :host
-
+#set :protection, except: :host
+disable :protection 
 #set :protection, origin_whitelist: ['*.a.hackclub.com']
 enable :sessions
 set :port, ENV.fetch("PORT", 4567)  # Fallback to 4567 if PORT isn't set
