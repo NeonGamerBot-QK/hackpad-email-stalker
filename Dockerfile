@@ -14,15 +14,15 @@ RUN apt-get update -qq && \
 # Set working directory
 WORKDIR /app
 
-# Copy Gemfiles first for caching
+# Install gems
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
-# Copy the rest of the app
+# Copy app source
 COPY . .
 
-# Expose the port (Sinatra/Puma/Rack default)
+# Expose the port only if your app opens one
 EXPOSE 4567
 
-# Default command
+# Run your Ruby script directly
 CMD ["ruby", "src/main.rb"]
