@@ -3,7 +3,9 @@ require 'sinatra'
 require 'uri'
 require 'net/http'
 require 'securerandom'
-set :protection, origin_whitelist: ['*.a.hackclub.com']
+set :protection, except: :host
+
+#set :protection, origin_whitelist: ['*.a.hackclub.com']
 enable :sessions
 set :port, ENV.fetch("PORT", 4567)  # Fallback to 4567 if PORT isn't set
 set :bind, '0.0.0.0'                # Ensure it listens on all interfaces
