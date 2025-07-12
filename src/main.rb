@@ -6,12 +6,30 @@ require 'securerandom'
 #set :protection, except: :host
 #disable :protection 
 #set :protection, origin_whitelist: ['*.a.hackclub.com']
-set :protection, except: :http_origin  # this disables host checking
-disable :protection  # <-- this fully disables Rack::Protection (safe for internal apps)
+#set :protection, except: :http_origin  # this disables host checking
+#disable :protection  # <-- this fully disables Rack::Protection (safe for internal apps)
+
+# 🔓 Disable host protection
+#disable :protection
+#set :trusted_hosts, nil
+#use Rack::Protection::HostAuthorization, hosts: nil
+#use Rack::Protection,
+#  except: :http_origin  # allows CORS
+#use Rack::Protection::HostAuthorization, hosts: []
 
 enable :sessions
 set :port, ENV.fetch("PORT", 4567)  # Fallback to 4567 if PORT isn't set
 set :bind, '0.0.0.0'                # Ensure it listens on all interfaces
+
+allowed_hosts = ENV.fetch("ALLOWED_HOSTS", "").split(",")
+
+# ✅ Configure Rack::Protection::HostAuthorization
+if allowed_hosts.any?
+  use Rack::Protection::HostAuthorization, hosts: allowed_hosts
+else
+  # fallback: disable host check entirely if env is empty
+  disable :protection
+end
 
 SLACK_TOKEN = ENV["SLACK_TOKEN"]
 AIRTABLE_TOKEN= ENV["AIRTABLE_TOKEN"]
@@ -104,7 +122,7 @@ def notify_via_slack(email)
     link_to_record = link_to_hackpad_tracking(email)
     user_id = data["user"]["id"]
    message = link_to_record ?
-  ":neocat_3c: Here is the *permanent and public* link to your hackpad tracking status: https://prod/direct/" + link_to_record :
+  ":neocat_3c: Here is the *permanent and public* link to your hackpad tracking status: https://hackpad-tracker.saahild.com/direct/" + link_to_record :
   ":neocat_sad: You weren't found in the hackpad tracking system, please contact support."
 
     
@@ -164,7 +182,7 @@ end
 
 post '/submit' do
   token = params[:authenticity_token]
-  redirect "/?a=2" unless token == session[:csrf]
+ # redirect "/?a=2" unless token == session[:csrf]
   puts "/submit"
   # Send silly willy slack dm here
   notify_via_slack(params[:email])
