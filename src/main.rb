@@ -3,23 +3,10 @@ require 'sinatra'
 require 'uri'
 require 'net/http'
 require 'securerandom'
-#set :protection, except: :host
-#disable :protection 
-#set :protection, origin_whitelist: ['*.a.hackclub.com']
-#set :protection, except: :http_origin  # this disables host checking
-#disable :protection  # <-- this fully disables Rack::Protection (safe for internal apps)
-
-# 🔓 Disable host protection
-#disable :protection
-#set :trusted_hosts, nil
-#use Rack::Protection::HostAuthorization, hosts: nil
-#use Rack::Protection,
-#  except: :http_origin  # allows CORS
-#use Rack::Protection::HostAuthorization, hosts: []
 
 enable :sessions
-set :port, ENV.fetch("PORT", 4567)  # Fallback to 4567 if PORT isn't set
-set :bind, '0.0.0.0'                # Ensure it listens on all interfaces
+set :port, ENV.fetch("PORT", 4567)  
+set :bind, '0.0.0.0'                
 
 allowed_hosts = ENV.fetch("ALLOWED_HOSTS", "").split(",")
 
@@ -27,7 +14,6 @@ allowed_hosts = ENV.fetch("ALLOWED_HOSTS", "").split(",")
 if allowed_hosts.any?
   use Rack::Protection::HostAuthorization, hosts: allowed_hosts
 else
-  # fallback: disable host check entirely if env is empty
   disable :protection
 end
 
@@ -35,9 +21,6 @@ SLACK_TOKEN = ENV["SLACK_TOKEN"]
 AIRTABLE_TOKEN= ENV["AIRTABLE_TOKEN"]
 AIRTABLE_BASE_ID= ENV["AIRTABLE_BASE_ID"]
 AIRTABLE_TABLE_NAME = ENV["AIRTABLE_TABLE_NAME"]
-# uri = URI('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY')
-# res = Net::HTTP.get_response(uri)
-# puts res.body if res.is_a?(Net::HTTPSuccess)
 helpers do
   def csrf_token
     session[:csrf] ||= SecureRandom.hex(32)
@@ -131,6 +114,7 @@ def notify_via_slack(email)
     puts "Error fetching user by email: #{data['error']}"
   end
 end
+
 get '/' do
   aquery = params[:a]
   <<~HTML
@@ -182,7 +166,6 @@ end
 
 post '/submit' do
   token = params[:authenticity_token]
- # redirect "/?a=2" unless token == session[:csrf]
   puts "/submit"
   # Send silly willy slack dm here
   notify_via_slack(params[:email])
